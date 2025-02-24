@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "SysTick.h"
+#include "PWM.h"
 
 //#define DIRECTION (*((volatile unsigned long *)0x4002403C))
 //#define FORWARD 		0x0F	//1111 3 = 4th bit, 2 = 3rd bit, 1 = 2nd bit, 0 = 1st bit
@@ -31,33 +32,33 @@
 //#define PIVOT_LEFT	0x0B	//1011
 //#define PIVOT_RIGHT	0x0E	//1110
 // PortB = 40005XXX, pins 7,6,3,2 = 330
-#define DIRECTION (*((volatile unsigned long *)0x40005330))
-// 11001100 = 0xCC
-// right motor pins 7,6 // left motor pins 3,2
-#define FORWARD 			0xCC 	//11001100
-#define BACKWARD 			0x88  //10001000
-#define PIVOT_LEFT		0xC8	//11001000 right forward, left backward
-#define PIVOT_RIGHT 	0x8C	//10001100 right backward, left forward
+//#define DIRECTION (*((volatile unsigned long *)0x40005330))
+//// 11001100 = 0xCC
+//// right motor pins 7,6 // left motor pins 3,2
+//#define FORWARD 			0xCC 	//11001100
+//#define BACKWARD 			0x88  //10001000
+//#define PIVOT_LEFT		0xC8	//11001000 right forward, left backward
+//#define PIVOT_RIGHT 	0x8C	//10001100 right backward, left forward
 
-#define LIGHT (*((volatile unsigned long *)0x40025038))
-#define RED 0x02
-#define GREEN 0x08
-#define BLUE 0x04
+//#define LIGHT (*((volatile unsigned long *)0x40025038))
+//#define RED 0x02
+//#define GREEN 0x08
+//#define BLUE 0x04
 
-#define STOP 1
-#define SPEED_30 3000
-#define SPEED_35 3500
-#define SPEED_50 5000
-#define SPEED_60 6000
-#define SPEED_80 8000
-#define SPEED_98 9800
+//#define STOP 1
+//#define SPEED_30 3000
+//#define SPEED_35 3500
+//#define SPEED_50 5000
+//#define SPEED_60 6000
+//#define SPEED_80 8000
+//#define SPEED_98 9800
 
-#define PWMA 0x10 // left motor PB4 = 0x10, DIR=PB2 SLP=PB3
-#define PWMB 0x20 // right motor PB5 = 0x20, DIR=PB6 SLP=PB7
-// PWM	 0x30
-// direction pins
-// PB7,6,3,2 = 11001100 = 0xCC
-#define DIR_MASK 0xCC
+//#define PWMA 0x10 // left motor PB4 = 0x10, DIR=PB2 SLP=PB3
+//#define PWMB 0x20 // right motor PB5 = 0x20, DIR=PB6 SLP=PB7
+//// PWM	 0x30
+//// direction pins
+//// PB7,6,3,2 = 11001100 = 0xCC
+//#define DIR_MASK 0xCC
 
 uint16_t DUTY = STOP;
 
@@ -71,28 +72,28 @@ void Delay(void){unsigned long volatile time;
 }
 
 // configure the system to get its clock from the PLL
-void PLL_Init(void){
-  // 0) configure the system to use RCC2 for advanced features
-  //    such as 400 MHz PLL and non-integer System Clock Divisor
-  SYSCTL_RCC2_R |= SYSCTL_RCC2_USERCC2;
-  // 1) bypass PLL while initializing
-  SYSCTL_RCC2_R |= SYSCTL_RCC2_BYPASS2;
-  // 2) select the crystal value and oscillator source
-  SYSCTL_RCC_R &= ~SYSCTL_RCC_XTAL_M;   // clear XTAL field
-  SYSCTL_RCC_R += SYSCTL_RCC_XTAL_16MHZ;// configure for 16 MHz crystal
-  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_OSCSRC2_M;// clear oscillator source field
-  SYSCTL_RCC2_R += SYSCTL_RCC2_OSCSRC2_MO;// configure for main oscillator source
-  // 3) activate PLL by clearing PWRDN
-  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_PWRDN2;
-  // 4) set the desired system divider and the system divider least significant bit
-  SYSCTL_RCC2_R |= SYSCTL_RCC2_DIV400;  // use 400 MHz PLL
-  SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~0x1FC00000) // clear system clock divider field
-                  + (7<<22);      // configure for 50 MHz clock (400MHz / (7+1) = 50MHz)
-  // 5) wait for the PLL to lock by polling PLLLRIS
-  while((SYSCTL_RIS_R&SYSCTL_RIS_PLLLRIS)==0){};
-  // 6) enable use of PLL by clearing BYPASS
-  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_BYPASS2;
-}
+//void PLL_Init(void){
+//  // 0) configure the system to use RCC2 for advanced features
+//  //    such as 400 MHz PLL and non-integer System Clock Divisor
+//  SYSCTL_RCC2_R |= SYSCTL_RCC2_USERCC2;
+//  // 1) bypass PLL while initializing
+//  SYSCTL_RCC2_R |= SYSCTL_RCC2_BYPASS2;
+//  // 2) select the crystal value and oscillator source
+//  SYSCTL_RCC_R &= ~SYSCTL_RCC_XTAL_M;   // clear XTAL field
+//  SYSCTL_RCC_R += SYSCTL_RCC_XTAL_16MHZ;// configure for 16 MHz crystal
+//  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_OSCSRC2_M;// clear oscillator source field
+//  SYSCTL_RCC2_R += SYSCTL_RCC2_OSCSRC2_MO;// configure for main oscillator source
+//  // 3) activate PLL by clearing PWRDN
+//  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_PWRDN2;
+//  // 4) set the desired system divider and the system divider least significant bit
+//  SYSCTL_RCC2_R |= SYSCTL_RCC2_DIV400;  // use 400 MHz PLL
+//  SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~0x1FC00000) // clear system clock divider field
+//                  + (7<<22);      // configure for 50 MHz clock (400MHz / (7+1) = 50MHz)
+//  // 5) wait for the PLL to lock by polling PLLLRIS
+//  while((SYSCTL_RIS_R&SYSCTL_RIS_PLLLRIS)==0){};
+//  // 6) enable use of PLL by clearing BYPASS
+//  SYSCTL_RCC2_R &= ~SYSCTL_RCC2_BYPASS2;
+//}
 
 // period is 16-bit number of PWM clock cycles in one period 
 // Output on PB6/M0PWM0
@@ -261,75 +262,86 @@ void GPIOPortF_Handler(void){ // called on touch of either SW1 or SW2
 	int TENMS = 727240*20/91; //that's actually 20ms not 10
 	while(TENMS) TENMS--;
 	
-  if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch
-    GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
-		// forward 50
-		DIRECTION = FORWARD;
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);
-		// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// backward 50
-		DIRECTION = BACKWARD;
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// forward left 20 diff
-		DIRECTION = FORWARD;
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_30);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// forward right 20 diff
-		PWM0A_Duty(SPEED_30);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// backward left 20 diff
-		DIRECTION = BACKWARD;
-		PWM0A_Duty(SPEED_30);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// backward right 20 diff
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_30);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// pivot left
-		DIRECTION = PIVOT_LEFT;
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// pivot right
-		DIRECTION = PIVOT_RIGHT;
-		PWM0A_Duty(SPEED_50);
-		PWM0B_Duty(SPEED_50);
-		SysTick_Wait(3);// delay to prevent stalling
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
-		SysTick_Wait(1);
-		// reset
-		DIRECTION = FORWARD;
-		PWM0A_Duty(STOP);
-		PWM0B_Duty(STOP);
+  if((GPIO_PORTF_RIS_R&0x10) ){  // SW1 touch
+		// if car is not running
+		if (done == 0) {
+			done = 1;
+//			GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
+//			// forward 50
+//			DIRECTION = FORWARD;
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);
+//			// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// backward 50
+//			DIRECTION = BACKWARD;
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// forward left 20 diff
+//			DIRECTION = FORWARD;
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_30);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// forward right 20 diff
+//			PWM0A_Duty(SPEED_30);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// backward left 20 diff
+//			DIRECTION = BACKWARD;
+//			PWM0A_Duty(SPEED_30);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// backward right 20 diff
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_30);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// pivot left
+//			DIRECTION = PIVOT_LEFT;
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// pivot right
+//			DIRECTION = PIVOT_RIGHT;
+//			PWM0A_Duty(SPEED_50);
+//			PWM0B_Duty(SPEED_50);
+//			SysTick_Wait(16);// delay to prevent stalling
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+//			SysTick_Wait(4);
+//			// reset
+//			DIRECTION = FORWARD;
+//			PWM0A_Duty(STOP);
+//			PWM0B_Duty(STOP);
+		}
+		else
+		{
+			DIRECTION = FORWARD;
+			PWM0A_Duty(STOP);
+			PWM0B_Duty(STOP);
+			done = 0;
+		}
   }
 }
 

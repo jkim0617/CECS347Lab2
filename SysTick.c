@@ -5,7 +5,7 @@
 #include "SysTick.h"
 #include "tm4c123gh6pm.h"
 
-#define ONE_SECOND          4000000
+#define ONE_SECOND          3125000
 
 void SysTick_Start(void){
   NVIC_ST_CTRL_R = 0;
@@ -27,7 +27,6 @@ return NVIC_ST_RELOAD_R-NVIC_ST_CURRENT_R;
 // Time delay using busy wait.
 // This function assumes 16 MHz system clock.
 void SysTick_Wait(uint8_t delay){
-	delay = delay*4;
 	for (int i = 0; i < delay; i++)
 	{	
 		NVIC_ST_CTRL_R = 0;

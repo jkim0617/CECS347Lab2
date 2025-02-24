@@ -406,9 +406,14 @@
               <FilePath>.\SysTick.c</FilePath>
             </File>
             <File>
-              <FileName>SysTick.h</FileName>
+              <FileName>PLL.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\PLL.c</FilePath>
+            </File>
+            <File>
+              <FileName>PLL.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\SysTick.h</FilePath>
+              <FilePath>.\PLL.h</FilePath>
             </File>
           </Files>
         </Group>

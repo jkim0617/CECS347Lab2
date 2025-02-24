@@ -3,9 +3,9 @@
 <title>Static Call Graph - [.\Hardware_PWM_Car.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Hardware_PWM_Car.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6210000: Last Updated: Mon Feb 24 11:10:27 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6210000: Last Updated: Mon Feb 24 11:30:30 2025
 <BR><P>
-<H3>Maximum Stack Usage =         48 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =         56 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 GPIOPortF_Handler &rArr; SysTick_Wait
 <P>
@@ -775,8 +775,8 @@ Global Symbols
 
 <P><STRONG><a name="[c7]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[28]"></a>GPIOPortF_Handler</STRONG> (Thumb, 434 bytes, Stack size 40 bytes, pwm.o(.text.GPIOPortF_Handler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = GPIOPortF_Handler &rArr; SysTick_Wait
+<P><STRONG><a name="[28]"></a>GPIOPortF_Handler</STRONG> (Thumb, 436 bytes, Stack size 48 bytes, pwm.o(.text.GPIOPortF_Handler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = GPIOPortF_Handler &rArr; SysTick_Wait
 </UL>
 <BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM0B_Duty
@@ -784,7 +784,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
 </UL>
-<P><STRONG><a name="[92]"></a>PLL_Init</STRONG> (Thumb, 132 bytes, Stack size 4 bytes, pwm.o(.text.PLL_Init))
+<P><STRONG><a name="[92]"></a>PLL_Init</STRONG> (Thumb, 132 bytes, Stack size 4 bytes, pll.o(.text.PLL_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = PLL_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -826,7 +826,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[90]"></a>SysTick_Wait</STRONG> (Thumb, 130 bytes, Stack size 8 bytes, systick.o(.text.SysTick_Wait))
+<P><STRONG><a name="[90]"></a>SysTick_Wait</STRONG> (Thumb, 120 bytes, Stack size 8 bytes, systick.o(.text.SysTick_Wait))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = SysTick_Wait
 </UL>
 <BR>[Called By]<UL><LI><a href="#[28]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIOPortF_Handler
@@ -836,13 +836,13 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 32 + Unknown Stack Size
 <LI>Call Chain = main &rArr; PWM0GEN1B_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SwitchLED_Init
+<BR>[Calls]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
+<LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SwitchLED_Init
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortB_Init
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM0B_Duty
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM0GEN1B_Init
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM0A_Duty
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM0GEN1A_Init
-<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
 <LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WaitForInterrupt
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;EnableInterrupts
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DisableInterrupts
