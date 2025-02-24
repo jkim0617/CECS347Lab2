@@ -23,6 +23,7 @@
  */
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
+#include "SysTick.h"
 
 //#define DIRECTION (*((volatile unsigned long *)0x4002403C))
 //#define FORWARD 		0x0F	//1111 3 = 4th bit, 2 = 3rd bit, 1 = 2nd bit, 0 = 1st bit
@@ -117,7 +118,7 @@ void PWM0GEN1A_Init(uint16_t period){ // gen 1, A
   PWM0_1_LOAD_R = period - 1;           // 5) cycles needed to count down to 0
   PWM0_1_CMPA_R = 0;             // 6) count value when output rises
   PWM0_1_CTL_R |= 0x00000001;           // 7) start PWM0
-  PWM0_ENABLE_R |= 0x00000002;          // enable PB6/M0PWM2 FIX ME
+  PWM0_ENABLE_R |= 0x00000004;          // enable PB6/M0PWM2 FIX ME
 }
 // change duty cycle of PB6
 // duty is number of PWM clock cycles output is high  
@@ -128,13 +129,13 @@ void PWM0A_Duty(uint16_t duty){
 // Output on PB7/M0PWM1 (PB4 NOW)
 void PWM0GEN1B_Init(uint16_t period){
   volatile unsigned long delay;
-	if ((SYSCTL_RCGC2_R&SYSCTL_RCGC2_GPIOB)==0) {
-		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOB;
-		while ((SYSCTL_RCGC2_R&SYSCTL_RCGC2_GPIOB) == 0) {};
-	}
+//	if ((SYSCTL_RCGC2_R&SYSCTL_RCGC2_GPIOB)==0) {
+//		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOB;
+//		while ((SYSCTL_RCGC2_R&SYSCTL_RCGC2_GPIOB) == 0) {};
+//	}
   SYSCTL_RCGCPWM_R |= 0x01;             // 1) activate PWM0
-//  SYSCTL_RCGCGPIO_R |= 0x02;            // 2) activate port B
-//  delay = SYSCTL_RCGCGPIO_R;            // allow time to finish activating
+  SYSCTL_RCGCGPIO_R |= 0x02;            // 2) activate port B
+  delay = SYSCTL_RCGCGPIO_R;            // allow time to finish activating
   GPIO_PORTB_AFSEL_R |= PWMB;           // enable alt funct on PB5
 //  GPIO_PORTB_PCTL_R &= ~0xF0000000;     // configure PB7 as M0PWM1
 //  GPIO_PORTB_PCTL_R |= 0x40000000;
@@ -152,7 +153,7 @@ void PWM0GEN1B_Init(uint16_t period){
   PWM0_1_LOAD_R = period - 1;           // 5) cycles needed to count down to 0: LAB2: PF1->M1PWM5:PWM1_2_
   PWM0_1_CMPB_R = 0;             // 6) count value when output rises: Lab 2:5%2=1->CMPB, GENB
   PWM0_1_CTL_R |= 0x00000001;           // 7) start PWM0: odd->B, even->A
-  PWM0_ENABLE_R |= 0x00000002;          // enable PB7/M0PWM3 
+  PWM0_ENABLE_R |= 0x00000008;          // enable PB5/M0PWM3 
 }
 // change duty cycle of PB7
 // duty is number of PWM clock cycles output is high  
@@ -263,36 +264,70 @@ void GPIOPortF_Handler(void){ // called on touch of either SW1 or SW2
   if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
 		// forward 50
-		DIRECTION |= FORWARD;
+		DIRECTION = FORWARD;
 		PWM0A_Duty(SPEED_50);
 		PWM0B_Duty(SPEED_50);
-		Delay();
+		SysTick_Wait(3);
+		// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// backward 50
-		DIRECTION |= BACKWARD;
-		Delay();
+		DIRECTION = BACKWARD;
+		PWM0A_Duty(SPEED_50);
+		PWM0B_Duty(SPEED_50);
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// forward left 20 diff
+		DIRECTION = FORWARD;
+		PWM0A_Duty(SPEED_50);
 		PWM0B_Duty(SPEED_30);
-		Delay();
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// forward right 20 diff
 		PWM0A_Duty(SPEED_30);
 		PWM0B_Duty(SPEED_50);
-		Delay();
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// backward left 20 diff
-		DIRECTION |= BACKWARD;
-		Delay();
+		DIRECTION = BACKWARD;
+		PWM0A_Duty(SPEED_30);
+		PWM0B_Duty(SPEED_50);
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// backward right 20 diff
 		PWM0A_Duty(SPEED_50);
 		PWM0B_Duty(SPEED_30);
-		Delay();
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// pivot left
-		DIRECTION |= PIVOT_LEFT;
+		DIRECTION = PIVOT_LEFT;
+		PWM0A_Duty(SPEED_50);
 		PWM0B_Duty(SPEED_50);
-		Delay();
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// pivot right
-		DIRECTION |= PIVOT_RIGHT;
-		Delay();
+		DIRECTION = PIVOT_RIGHT;
+		PWM0A_Duty(SPEED_50);
+		PWM0B_Duty(SPEED_50);
+		SysTick_Wait(3);// delay to prevent stalling
+		PWM0A_Duty(STOP);
+		PWM0B_Duty(STOP);
+		SysTick_Wait(1);
 		// reset
-		DIRECTION |= FORWARD;
+		DIRECTION = FORWARD;
 		PWM0A_Duty(STOP);
 		PWM0B_Duty(STOP);
   }

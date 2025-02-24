@@ -40,10 +40,7 @@ int main(void){
 	SwitchLED_Init();							// switches controls car direction, LEDs indicates car direction
 	EnableInterrupts();
 	
-	DIRECTION |= FORWARD;
-	PWM0A_Duty(SPEED_35);
-	PWM0B_Duty(SPEED_35);
-	Delay();
+	DIRECTION = FORWARD;
 	PWM0A_Duty(STOP);
 	PWM0B_Duty(STOP);
 	
